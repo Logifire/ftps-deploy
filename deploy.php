@@ -99,12 +99,22 @@ class Deployer
         
         $this->conn = ftp_ssl_connect($this->host, $this->port, self::CONNECTION_TIMEOUT_SECONDS);
         if (!$this->conn) {
-            throw new \Exception("Could not connect to FTP server.");
+            throw new \Exception(sprintf(
+                "Could not establish FTPS connection to %s:%d (timeout: %ds)",
+                $this->host,
+                $this->port,
+                self::CONNECTION_TIMEOUT_SECONDS
+            ));
         }
         
         $login = ftp_login($this->conn, $this->username, $this->password);
         if (!$login) {
-            throw new \Exception("FTP login failed.");
+            throw new \Exception(sprintf(
+                "FTPS authentication failed for user '%s' on %s:%d",
+                $this->username,
+                $this->host,
+                $this->port
+            ));
         }
 
         // Set timeout for subsequent operations
