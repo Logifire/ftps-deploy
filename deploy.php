@@ -4,6 +4,7 @@ namespace Deploy;
 
 class Deployer
 {
+    private const CONNECTION_TIMEOUT_SECONDS = 5;
     private string $hashFile = '.deploy-hashes.json';
     private array $fileHashes = [];
     private array $changedFiles = [];
@@ -96,7 +97,7 @@ class Deployer
     {
         echo "Connecting to FTPS server...\n";
         
-        $this->conn = ftp_ssl_connect($this->host, $this->port);
+        $this->conn = ftp_ssl_connect($this->host, $this->port, self::CONNECTION_TIMEOUT_SECONDS);
         if (!$this->conn) {
             throw new \Exception("Could not connect to FTP server.");
         }
@@ -105,6 +106,9 @@ class Deployer
         if (!$login) {
             throw new \Exception("FTP login failed.");
         }
+
+        // Set timeout for subsequent operations
+        stream_set_timeout($this->conn, self::CONNECTION_TIMEOUT_SECONDS);
         
         // Enable passive mode
         ftp_pasv($this->conn, true);
