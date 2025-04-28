@@ -14,5 +14,8 @@
     },
     "scripts": {
         "deploy": "php deploy.php"
+    },
+    "scripts-descriptions": {
+        "deploy": "Deploy files to the remote FTPS server using configuration from deploy-config.php"
     }
 }
