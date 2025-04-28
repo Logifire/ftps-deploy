@@ -1,0 +1,18 @@
+{
+    "name": "logifire/ftps-deploy",
+    "description": "Simple FTPS deployment tool",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Deploy\\": ""
+        }
+    },
+    "require": {
+        "php": ">=8.0",
+        "ext-ftp": "*"
+    },
+    "scripts": {
+        "deploy": "php deploy.php"
+    }
+}
