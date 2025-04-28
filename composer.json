@@ -12,6 +12,9 @@
         "php": ">=8.0",
         "ext-ftp": "*"
     },
+    "bin": [
+        "deploy.php"
+    ],    
     "scripts": {
         "deploy": "php deploy.php"
     },
