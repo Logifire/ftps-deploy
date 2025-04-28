@@ -46,7 +46,16 @@ class Deployer
             return;
         }
         
-        echo "Found " . count($this->changedFiles) . " files to upload.\n";
+        echo "Found " . count($this->changedFiles) . " files to upload:\n";
+        foreach ($this->changedFiles as $file) {
+            echo "  - $file\n";
+        }
+        echo "\n";
+        
+        if (!$this->confirmDeployment()) {
+            echo "Deployment cancelled.\n";
+            return;
+        }
         
         $this->connectFTPS();
         $this->uploadChangedFiles();
@@ -54,6 +63,16 @@ class Deployer
         $this->disconnect();
         
         echo "Deployment completed successfully.\n";
+    }
+
+    private function confirmDeployment(): bool
+    {
+        echo "Do you want to proceed with the deployment? [Y/n] ";
+        $handle = fopen("php://stdin", "r");
+        $line = trim(fgets($handle));
+        fclose($handle);
+        
+        return empty($line) || strtolower($line) === 'y';
     }
 
     private function loadPreviousHashes(): void

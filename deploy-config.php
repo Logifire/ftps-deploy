@@ -22,6 +22,9 @@ return [
         'deploy-config.php',
         'deploy.php',
         '*.log',
-        'tests'
+        'tests',
+        'composer.json',
+        'LICENSE',
+        'README.md'
     ]
 ];
