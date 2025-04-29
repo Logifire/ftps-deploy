@@ -201,19 +201,23 @@ class Deployer
 }
 
 // Run the deployment when executed from command line
-if (PHP_SAPI === 'cli' && realpath($_SERVER['SCRIPT_FILENAME']) === realpath(__FILE__)) {
-    if (!file_exists('deploy-config.php')) {
-        die("Config file 'deploy-config.php' not found.\n");
+if (PHP_SAPI === 'cli') {
+    // Get the working directory from where the script is being executed
+    $workingDir = getcwd();
+    $configFile = $workingDir . '/deploy-config.php';
+    
+    if (!file_exists($configFile)) {
+        die("Config file 'deploy-config.php' not found in {$workingDir}\n");
     }
     
-    $config = require 'deploy-config.php';
+    $config = require $configFile;
     
     try {
         $deployer = new Deployer(
             host: $config['host'],
             username: $config['username'],
             password: $config['password'],
-            localBasePath: $config['local_path'] ?? __DIR__,
+            localBasePath: $config['local_path'] ?? $workingDir,
             remoteBasePath: $config['remote_path'],
             port: $config['port'] ?? 21,
             ignoredPatterns: $config['ignore_patterns'] ?? []
