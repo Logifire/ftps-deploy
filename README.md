@@ -21,7 +21,15 @@ composer require logifire/ftps-deploy
 
 ## Configuration
 
-Create a `deploy-config.php` file in your project root:
+You can initialize a template configuration file by running:
+
+```bash
+vendor/bin/deploy.php init
+```
+
+This will create a `deploy-config.php` file in your project root which you can then edit with your FTPS credentials.
+
+Otherwise, create a `deploy-config.php` file manually in your project root:
 
 ```php
 <?php
@@ -50,10 +58,10 @@ return [
 
 ## Usage
 
-Run deployment using Composer:
+Run deployment using:
 
 ```bash
-composer run deploy
+vendor/bin/deploy.php
 ```
 
 ## Requirements
