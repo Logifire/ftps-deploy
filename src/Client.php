@@ -17,7 +17,8 @@ class Client
         private string $localBasePath,
         private string $remoteBasePath,
         private int $port = 21,
-        private array $ignoredPatterns = []
+        private array $ignoredPatterns = [],
+        private array $pathMappings = []
     ) {
         // Clean up paths
         $this->localBasePath = rtrim($localBasePath, '/');
@@ -136,12 +137,12 @@ class Client
     {
         foreach ($this->changedFiles as $file) {
             $localFile = $this->localBasePath . '/' . $file;
-            $remoteFile = $this->remoteBasePath . '/' . $file;
+            $remoteFile = $this->getRemotePath($file);
             
             // Create directory structure if needed
             $this->ensureRemoteDirectory(dirname($remoteFile));
             
-            echo "Uploading: $file\n";
+            echo "Uploading: $file to $remoteFile\n";
             if (!ftp_put($this->conn, $remoteFile, $localFile, FTP_BINARY)) {
                 echo "Failed to upload $file\n";
             }
@@ -185,5 +186,25 @@ class Client
         if ($this->conn) {
             ftp_close($this->conn);
         }
+    }
+
+    private function getRemotePath(string $localFile): string 
+    {
+        // Check for exact file matches first
+        if (isset($this->pathMappings[$localFile])) {
+            return $this->pathMappings[$localFile];
+        }
+
+        // Then check for pattern matches
+        foreach ($this->pathMappings as $pattern => $remotePath) {
+            if (fnmatch($pattern, $localFile)) {
+                // Replace the matching part with the remote path
+                $relativePath = ltrim(substr($localFile, strlen(dirname($pattern))), '/');
+                return rtrim($remotePath, '/') . '/' . $relativePath;
+            }
+        }
+
+        // Default to the standard remote path if no mapping found
+        return $this->remoteBasePath . '/' . $localFile;
     }
 }
