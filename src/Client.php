@@ -22,18 +22,6 @@ class Client
         // Clean up paths
         $this->localBasePath = rtrim($localBasePath, '/');
         $this->remoteBasePath = rtrim($remoteBasePath, '/');
-        
-        // Set default ignore patterns if none provided
-        if (empty($this->ignoredPatterns)) {
-            $this->ignoredPatterns = [
-                '.git', 
-                'node_modules', 
-                'vendor', 
-                '.deploy-hashes.json',
-                '*.log',
-                'tests'
-            ];
-        }
     }
 
     public function deploy(): void
