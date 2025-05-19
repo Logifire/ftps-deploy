@@ -1,5 +1,5 @@
 <?php
-// deploy-config.php - Configuration for FTPS deployment
+// deploy-config.tpl.php - Configuration template for FTPS deployment
 
 return [
     // FTP connection settings

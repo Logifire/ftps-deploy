@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 require __DIR__ . '/vendor/autoload.php';
@@ -6,7 +7,7 @@ use Deploy\Client;
 
 function initializeConfig(string $targetDir): void 
 {
-    $templatePath = __DIR__ . '/deploy-config.php';
+    $templatePath = __DIR__ . '/src/deploy-config.tpl.php';
     $targetPath = rtrim($targetDir, '/') . '/deploy-config.php';
     
     if (file_exists($targetPath)) {
