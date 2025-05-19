@@ -36,7 +36,7 @@ if (PHP_SAPI === 'cli') {
     
     if (!file_exists($configFile)) {
         die("Config file 'deploy-config.php' not found in {$workingDir}\n" .
-            "Run with --init to create a template configuration file.\n");
+            "Run with \"init\" to create a template configuration file.\n");
     }
     
     $config = require $configFile;
