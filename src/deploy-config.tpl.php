@@ -1,5 +1,5 @@
 <?php
-// deploy-config.tpl.php - Configuration template for FTPS deployment
+// Configuration for FTPS deployment
 
 return [
     // FTP connection settings
@@ -15,17 +15,17 @@ return [
     // Define where specific paths should be uploaded to
     // Format: 'local-pattern' => 'remote-path'
     'path_mappings' => [
-        // Upload public filer til public_html
-        'public/*' => '/public_html',
+        // Upload public files to public_html
+        // 'public/*' => '/public_html',
         
-        // Upload src mappe til private_html/src
-        'src/*' => '/private_html/src',
+        // Upload src folder to private_html/src
+        // 'src/*' => '/private_html/src',
         
-        // Upload config filer til private_html/config
-        'config/*' => '/private_html/config',
+        // Upload config files to private_html/config
+        // 'config/*' => '/private_html/config',
         
-        // Upload enkelte filer til specifikke placeringer
-        'index.php' => '/public_html/index.php'
+        // Upload individual files to specific locations
+        // 'index.php' => '/public_html/index.php'
     ],
     
     // Files/folders to ignore (supports wildcards)
