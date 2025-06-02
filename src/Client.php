@@ -141,9 +141,6 @@ class Client
             ));
         }
 
-        // Set timeout for subsequent operations
-        stream_set_timeout($this->conn, self::CONNECTION_TIMEOUT_SECONDS);
-        
         // Enable passive mode
         ftp_pasv($this->conn, true);
         echo "Connected successfully.\n";
