@@ -40,10 +40,6 @@ return [
     'username' => 'your-username',
     'password' => 'your-password',
     
-    // Local and remote paths
-    'local_path' => __DIR__,  // Current directory
-    'remote_path' => '/public_html',  // Remote path
-    
     // Files/folders to ignore (supports wildcards)
     'ignore_patterns' => [
         '.git',
@@ -56,12 +52,44 @@ return [
 ];
 ```
 
+## Custom Configuration File Location
+
+By default, `deploy.php` looks for `deploy-config.php` in the current working directory. If you want to use a configuration file located elsewhere, you can specify its path using the `--config` option:
+
+```bash
+vendor/bin/deploy.php --config=path/to/your/deploy-config.php
+```
+
+This allows you to keep multiple configuration files for different environments or projects, and select which one to use at deploy time.
+
 ## Usage
 
 Run deployment using:
 
 ```bash
 vendor/bin/deploy.php
+```
+
+You can also specify a custom config file location with the `--config` argument:
+
+```bash
+vendor/bin/deploy.php --config=path/to/deploy-config.php
+```
+
+## Composer Script (Optional)
+
+If you are using Composer, you can add a convenient script to your `composer.json`:
+
+```json
+"scripts": {
+    "deploy": "php vendor/bin/deploy.php"
+}
+```
+
+This allows you to run deployment with:
+
+```bash
+composer deploy
 ```
 
 ## Requirements

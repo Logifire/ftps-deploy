@@ -31,9 +31,21 @@ if (PHP_SAPI === 'cli') {
         initializeConfig($workingDir);
         exit(0);
     }
-    
-    $configFile = $workingDir . '/deploy-config.php';
-    
+
+    // Parse --config argument
+    $configFile = null;
+    foreach ($argv as $arg) {
+        if (str_starts_with($arg, '--config=')) {
+            $configFile = substr($arg, 9);
+            break;
+        }
+    }
+    if (!$configFile) {
+        $configFile = $workingDir . '/deploy-config.php';
+    } elseif (!is_file($configFile)) {
+        die("Config file not found at: {$configFile}\n");
+    }
+
     if (!file_exists($configFile)) {
         die("Config file 'deploy-config.php' not found in {$workingDir}\n" .
             "Run with \"init\" to create a template configuration file.\n");
