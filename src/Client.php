@@ -7,7 +7,9 @@ class Client
     private const CONNECTION_TIMEOUT_SECONDS = 5;
     private string $hashFile = '.deploy-hashes.json';
     private array $fileHashes = [];
+    private array $previousFileHashes = [];
     private array $changedFiles = [];
+    private array $deletedFiles = [];
     private $conn;
 
     private string $localBasePath;
@@ -29,17 +31,26 @@ class Client
     {
         $this->loadPreviousHashes();
         $this->detectChangedFiles();
+        $this->detectDeletedFiles();
         
-        if (empty($this->changedFiles)) {
-            echo "No files need to be uploaded.\n";
+        if (empty($this->changedFiles) && empty($this->deletedFiles)) {
+            echo "No files need to be uploaded or deleted.\n";
             return;
         }
-        
-        echo "Found " . count($this->changedFiles) . " files to upload:\n";
-        foreach ($this->changedFiles as $file) {
-            echo "  - $file\n";
+        if (!empty($this->changedFiles)) {
+            echo "Found " . count($this->changedFiles) . " files to upload:\n";
+            foreach ($this->changedFiles as $file) {
+                echo "  - $file\n";
+            }
+            echo "\n";
         }
-        echo "\n";
+        if (!empty($this->deletedFiles)) {
+            echo "Found " . count($this->deletedFiles) . " files to delete:\n";
+            foreach ($this->deletedFiles as $file) {
+                echo "  - $file\n";
+            }
+            echo "\n";
+        }
         
         if (!$this->confirmDeployment()) {
             echo "Deployment cancelled.\n";
@@ -47,6 +58,7 @@ class Client
         }
         
         $this->connectFTPS();
+        $this->deleteRemovedFiles();
         $this->uploadChangedFiles();
         $this->saveHashes();
         $this->disconnect();
@@ -67,8 +79,9 @@ class Client
     private function loadPreviousHashes(): void
     {
         if (file_exists($this->hashFile)) {
-            $this->fileHashes = json_decode(file_get_contents($this->hashFile), true) ?: [];
+            $this->previousFileHashes = json_decode(file_get_contents($this->hashFile), true) ?: [];
         }
+        $this->fileHashes = [];
     }
 
     private function detectChangedFiles(string $dir = ''): void
@@ -109,12 +122,18 @@ class Client
                 $this->detectChangedFiles($relativePath);
             } else {
                 $currentHash = md5_file($fullPath);
-                if (!isset($this->fileHashes[$relativePath]) || $this->fileHashes[$relativePath] !== $currentHash) {
+                if (!isset($this->previousFileHashes[$relativePath]) || $this->previousFileHashes[$relativePath] !== $currentHash) {
                     $this->changedFiles[] = $relativePath;
-                    $this->fileHashes[$relativePath] = $currentHash;
                 }
+                $this->fileHashes[$relativePath] = $currentHash;
             }
         }
+    }
+    
+    private function detectDeletedFiles(): void
+    {
+        $deleted = array_diff(array_keys($this->previousFileHashes), array_keys($this->fileHashes));
+        $this->deletedFiles = $deleted;
     }
     
     private function connectFTPS(): void
@@ -159,6 +178,18 @@ class Client
             if (!ftp_put($this->conn, $remoteFile, $localFile, FTP_BINARY)) {
                 echo "Failed to upload $file\n";
             }
+        }
+    }
+    
+    private function deleteRemovedFiles(): void
+    {
+        foreach ($this->deletedFiles as $file) {
+            $remoteFile = $this->getRemotePath($file);
+            echo "Deleting remote file: $remoteFile\n";
+            if (!@ftp_delete($this->conn, $remoteFile)) {
+                echo "Failed to delete $remoteFile\n";
+            }
+            unset($this->fileHashes[$file]);
         }
     }
     
