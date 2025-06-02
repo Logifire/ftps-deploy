@@ -197,7 +197,8 @@ class Client
     private function disconnect(): void
     {
         if ($this->conn) {
-            ftp_close($this->conn);
+            // Suppress SSL_read warning on shutdown (common with FTPS servers)
+            @ftp_close($this->conn);
         }
     }
 
