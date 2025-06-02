@@ -10,19 +10,19 @@ class Client
     private array $changedFiles = [];
     private $conn;
 
+    private string $localBasePath;
+    private string $remoteBasePath;
+
     public function __construct(
         private string $host,
         private string $username,
         private string $password,
-        private string $localBasePath,
-        private string $remoteBasePath,
         private int $port = 21,
         private array $ignoredPatterns = [],
         private array $pathMappings = []
     ) {
-        // Clean up paths
-        $this->localBasePath = rtrim($localBasePath, '/');
-        $this->remoteBasePath = rtrim($remoteBasePath, '/');
+        $this->localBasePath = rtrim(getcwd(), '/');
+        $this->remoteBasePath = '/';
     }
 
     public function deploy(): void

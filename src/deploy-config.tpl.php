@@ -8,10 +8,6 @@ return [
     'username' => 'your-username',
     'password' => 'your-password',
     
-    // Local and remote paths
-    'local_path' => __DIR__,  // Current directory - adjust if needed
-    'remote_path' => '/public_html',  // Base remote path for files without specific mapping
-    
     // Define where specific paths should be uploaded to
     // Format: 'local-pattern' => 'remote-path'
     'path_mappings' => [

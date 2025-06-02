@@ -46,10 +46,9 @@ if (PHP_SAPI === 'cli') {
             host: $config['host'],
             username: $config['username'],
             password: $config['password'],
-            localBasePath: $config['local_path'] ?? $workingDir,
-            remoteBasePath: $config['remote_path'],
             port: $config['port'] ?? 21,
-            ignoredPatterns: $config['ignore_patterns'] ?? []
+            ignoredPatterns: $config['ignore_patterns'] ?? [],
+            pathMappings: $config['path_mappings'] ?? []
         );
         
         $client->deploy();
