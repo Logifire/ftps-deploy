@@ -81,14 +81,30 @@ class Client
             
             $relativePath = $dir ? "$dir/$file" : $file;
             $fullPath = "$fullDir/$file";
-            
+
             // Check if path should be ignored
             foreach ($this->ignoredPatterns as $pattern) {
                 if (fnmatch($pattern, $relativePath) || fnmatch("*/$pattern", $relativePath)) {
                     continue 2;
                 }
             }
-            
+
+            // Only consider files that match pathMappings (exact or pattern)
+            $matchesMapping = false;
+            if (isset($this->pathMappings[$relativePath])) {
+                $matchesMapping = true;
+            } else {
+                foreach (array_keys($this->pathMappings) as $pattern) {
+                    if (fnmatch($pattern, $relativePath)) {
+                        $matchesMapping = true;
+                        break;
+                    }
+                }
+            }
+            if (!$matchesMapping && !is_dir($fullPath)) {
+                continue;
+            }
+
             if (is_dir($fullPath)) {
                 $this->detectChangedFiles($relativePath);
             } else {
