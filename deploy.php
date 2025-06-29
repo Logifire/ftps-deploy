@@ -60,7 +60,8 @@ if (PHP_SAPI === 'cli') {
             password: $config['password'],
             port: $config['port'] ?? 21,
             ignoredPatterns: $config['ignore_patterns'] ?? [],
-            pathMappings: $config['path_mappings'] ?? []
+            pathMappings: $config['path_mappings'] ?? [],
+            hashFile: $config['hash_file'] ?? '.deploy-hashes.json'
         );
         
         $client->deploy();

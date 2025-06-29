@@ -38,5 +38,9 @@ return [
         'composer.json',
         'LICENSE',
         'README.md'
-    ]
+    ],
+
+
+    // Path to the file where deployment hashes are stored (optional)
+    'hash_file' => '.deploy-hashes.json',
 ];

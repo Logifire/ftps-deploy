@@ -5,7 +5,7 @@ namespace Deploy;
 class Client
 {
     private const CONNECTION_TIMEOUT_SECONDS = 5;
-    private string $hashFile = '.deploy-hashes.json';
+    private string $hashFile;
     private array $fileHashes = [];
     private array $previousFileHashes = [];
     private array $changedFiles = [];
@@ -21,10 +21,12 @@ class Client
         private string $password,
         private int $port = 21,
         private array $ignoredPatterns = [],
-        private array $pathMappings = []
+        private array $pathMappings = [],
+        string $hashFile = '.deploy-hashes.json'
     ) {
         $this->localBasePath = rtrim(getcwd(), '/');
         $this->remoteBasePath = '/';
+        $this->hashFile = $hashFile;
     }
 
     public function deploy(): void

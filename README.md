@@ -92,6 +92,24 @@ This allows you to run deployment with:
 composer deploy
 ```
 
+## Deployment Hashes File (`deploy-hashes.json`)
+
+FTPS Deploy keeps track of file changes using a JSON file (by default named `.deploy-hashes.json`) in your project directory. This file stores hashes of previously deployed files to determine which files have changed and need to be uploaded or deleted.
+
+- **Default location:** `.deploy-hashes.json` in your project root.
+- **Custom location:** The `hash_file` entry is present by default in your `deploy-config.php` file. You can change its value to specify a different path:
+
+```php
+'hash_file' => '/path/to/your-hashes.json',
+```
+
+This is useful if you want to:
+- Store deployment state outside your project directory (e.g., in CI/CD pipelines like GitHub Actions)
+- Use different hash files for different environments
+- Avoid committing the hash file to version control
+
+If you change the location, make sure the path is writable by the deployment process.
+
 ## Requirements
 
 - PHP 8.0 or higher
