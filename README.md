@@ -54,7 +54,7 @@ return [
 
 ## Custom Configuration File Location
 
-By default, `deploy.php` looks for `deploy-config.php` in the current working directory. If you want to use a configuration file located elsewhere, you can specify its path using the `--config` option:
+By default, FTPS deploy looks for `deploy-config.php` in the current working directory. If you want to use a configuration file located elsewhere, you can specify its path using the `--config` option:
 
 ```bash
 vendor/bin/deploy.php --config=path/to/your/deploy-config.php
@@ -76,13 +76,20 @@ You can also specify a custom config file location with the `--config` argument:
 vendor/bin/deploy.php --config=path/to/deploy-config.php
 ```
 
+To see available options, run:
+
+```bash
+vendor/bin/deploy.php --help
+```
+
 ## Composer Script (Optional)
 
 If you are using Composer, you can add a convenient script to your `composer.json`:
 
 ```json
 "scripts": {
-    "deploy": "php vendor/bin/deploy.php"
+    "deploy": "php vendor/bin/deploy.php",
+    "deploy:staging": "php vendor/bin/deploy.php --config=deploy-config.staging.php"
 }
 ```
 
@@ -90,6 +97,12 @@ This allows you to run deployment with:
 
 ```bash
 composer deploy
+```
+
+Or, to deploy with a custom config file (e.g., for staging):
+
+```bash
+composer deploy:staging
 ```
 
 ## Deployment Hashes File (`deploy-hashes.json`)

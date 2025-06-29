@@ -104,15 +104,17 @@ class Client
                 }
             }
 
-            // Only consider files that match pathMappings (exact or pattern)
-            $matchesMapping = false;
-            if (isset($this->pathMappings[$relativePath])) {
-                $matchesMapping = true;
-            } else {
-                foreach (array_keys($this->pathMappings) as $pattern) {
-                    if (fnmatch($pattern, $relativePath)) {
-                        $matchesMapping = true;
-                        break;
+            // If pathMappings is empty, include all files (except ignored)
+            $matchesMapping = empty($this->pathMappings);
+            if (!$matchesMapping) {
+                if (isset($this->pathMappings[$relativePath])) {
+                    $matchesMapping = true;
+                } else {
+                    foreach (array_keys($this->pathMappings) as $pattern) {
+                        if (fnmatch($pattern, $relativePath)) {
+                            $matchesMapping = true;
+                            break;
+                        }
                     }
                 }
             }

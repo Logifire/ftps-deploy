@@ -24,7 +24,7 @@ function initializeConfig(string $targetDir): void
 
 function printHelp(): void
 {
-    echo "Usage: php deploy.php [init|--help] [--config=path]\n";
+    echo "Usage: deploy.php [init|--help] [--config=path]\n";
     echo "\nOptions:\n";
     echo "  init            Create a template deploy-config.php in the current directory.\n";
     echo "  --config=PATH   Use a custom config file instead of ./deploy-config.php.\n";
