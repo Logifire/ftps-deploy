@@ -2,7 +2,7 @@
     "name": "logifire/ftps-deploy",
     "description": "Simple FTPS deployment tool",
     "type": "library",
-    "license": "GPL-3.0-or-later",
+    "license": "GPL-3.0",
     "autoload": {
         "psr-4": {
             "Deploy\\": "src/"
