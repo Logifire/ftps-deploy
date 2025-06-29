@@ -60,12 +60,28 @@ class Client
         }
         
         $this->connectFTPS();
-        $this->deleteRemovedFiles();
-        $this->uploadChangedFiles();
+        $deleteErrors = $this->deleteRemovedFilesWithErrors();
+        $uploadErrors = $this->uploadChangedFilesWithErrors();
         $this->saveHashes();
         $this->disconnect();
         
-        echo "Deployment completed successfully.\n";
+        if (empty($deleteErrors) && empty($uploadErrors)) {
+            echo "Deployment completed successfully.\n";
+        } else {
+            echo "Deployment completed with errors.\n";
+            if (!empty($deleteErrors)) {
+                echo "Failed to delete the following files:\n";
+                foreach ($deleteErrors as $file) {
+                    echo "  - $file\n";
+                }
+            }
+            if (!empty($uploadErrors)) {
+                echo "Failed to upload the following files:\n";
+                foreach ($uploadErrors as $file) {
+                    echo "  - $file\n";
+                }
+            }
+        }
     }
 
     private function confirmDeployment(): bool
@@ -169,32 +185,35 @@ class Client
         echo "Connected successfully.\n";
     }
     
-    private function uploadChangedFiles(): void
+    private function uploadChangedFilesWithErrors(): array
     {
+        $errors = [];
         foreach ($this->changedFiles as $file) {
             $localFile = $this->localBasePath . '/' . $file;
             $remoteFile = $this->getRemotePath($file);
-            
-            // Create directory structure if needed
             $this->ensureRemoteDirectory(dirname($remoteFile));
-            
             echo "Uploading: $file to $remoteFile\n";
             if (!ftp_put($this->conn, $remoteFile, $localFile, FTP_BINARY)) {
                 echo "Failed to upload $file\n";
+                $errors[] = $file;
             }
         }
+        return $errors;
     }
-    
-    private function deleteRemovedFiles(): void
+
+    private function deleteRemovedFilesWithErrors(): array
     {
+        $errors = [];
         foreach ($this->deletedFiles as $file) {
             $remoteFile = $this->getRemotePath($file);
             echo "Deleting remote file: $remoteFile\n";
             if (!@ftp_delete($this->conn, $remoteFile)) {
                 echo "Failed to delete $remoteFile\n";
+                $errors[] = $file;
             }
             unset($this->fileHashes[$file]);
         }
+        return $errors;
     }
     
     private function ensureRemoteDirectory(string $dir): void
