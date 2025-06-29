@@ -134,4 +134,6 @@ If you change the location, make sure the path is writable by the deployment pro
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
+**Disclaimer:** While FTPS Deploy automates the deployment process, it is the user's responsibility to verify that all files are correctly synchronized and that the deployment meets the intended requirements. Always review your deployment results and test your application after deploying.
+
 *Note: This library, including its code, documentation, and this README, was generated with the assistance of AI.*
