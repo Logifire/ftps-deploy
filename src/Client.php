@@ -5,11 +5,9 @@ namespace Deploy;
 class Client
 {
     private const CONNECTION_TIMEOUT_SECONDS = 5;
-    private string $hashFile;
-    private array $fileHashes = [];
-    private array $previousFileHashes = [];
     private array $changedFiles = [];
     private array $deletedFiles = [];
+    private ChangedFilesDetector $detector;
     private $conn;
 
     private string $localBasePath;
@@ -26,15 +24,30 @@ class Client
     ) {
         $this->localBasePath = rtrim(getcwd(), '/');
         $this->remoteBasePath = '/';
-        $this->hashFile = $hashFile;
+        $this->detector = new ChangedFilesDetector(
+            $this->localBasePath,
+            $this->ignoredPatterns,
+            $this->pathMappings,
+            $hashFile
+        );
     }
 
-    public function deploy(): void
+    /**
+     * Deploys files or only generates hashes if $onlyHashes is true.
+     * @param bool $onlyHashes If true, only generate/update the hash file and do not deploy anything.
+     */
+    public function deploy(bool $onlyHashes = false): void
     {
-        $this->loadPreviousHashes();
-        $this->detectChangedFiles();
-        $this->detectDeletedFiles();
-        
+        if ($onlyHashes) {
+            $result = $this->detector->generateHashesOnly();
+            echo "Hash file generated/updated with " . count($result['hashes']) . " entries.\n";
+            return;
+        }
+
+        $result = $this->detector->detect();
+        $this->changedFiles = $result['changed'];
+        $this->deletedFiles = $result['deleted'];
+
         if (empty($this->changedFiles) && empty($this->deletedFiles)) {
             echo "No files need to be uploaded or deleted.\n";
             return;
@@ -42,7 +55,7 @@ class Client
         if (!empty($this->changedFiles)) {
             echo "Found " . count($this->changedFiles) . " files to upload:\n";
             foreach ($this->changedFiles as $file) {
-                echo "  - $file\n";
+                echo "  + $file\n";
             }
             echo "\n";
         }
@@ -53,18 +66,18 @@ class Client
             }
             echo "\n";
         }
-        
+
         if (!$this->confirmDeployment()) {
             echo "Deployment cancelled.\n";
             return;
         }
-        
+
         $this->connectFTPS();
         $deleteErrors = $this->deleteRemovedFilesWithErrors();
         $uploadErrors = $this->uploadChangedFilesWithErrors();
-        $this->saveHashes();
+        $this->detector->saveHashesToFile();
         $this->disconnect();
-        
+
         if (empty($deleteErrors) && empty($uploadErrors)) {
             echo "Deployment completed successfully.\n";
         } else {
@@ -78,7 +91,7 @@ class Client
             if (!empty($uploadErrors)) {
                 echo "Failed to upload the following files:\n";
                 foreach ($uploadErrors as $file) {
-                    echo "  - $file\n";
+                    echo "  + $file\n";
                 }
             }
         }
@@ -92,68 +105,6 @@ class Client
         fclose($handle);
         
         return empty($line) || strtolower($line) === 'y';
-    }
-
-    private function loadPreviousHashes(): void
-    {
-        if (file_exists($this->hashFile)) {
-            $this->previousFileHashes = json_decode(file_get_contents($this->hashFile), true) ?: [];
-        }
-        $this->fileHashes = [];
-    }
-
-    private function detectChangedFiles(string $dir = ''): void
-    {
-        $fullDir = $this->localBasePath . '/' . $dir;
-        $files = scandir($fullDir);
-        
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..') continue;
-            
-            $relativePath = $dir ? "$dir/$file" : $file;
-            $fullPath = "$fullDir/$file";
-
-            // Check if path should be ignored
-            foreach ($this->ignoredPatterns as $pattern) {
-                if (fnmatch($pattern, $relativePath) || fnmatch("*/$pattern", $relativePath)) {
-                    continue 2;
-                }
-            }
-
-            // If pathMappings is empty, include all files (except ignored)
-            $matchesMapping = empty($this->pathMappings);
-            if (!$matchesMapping) {
-                if (isset($this->pathMappings[$relativePath])) {
-                    $matchesMapping = true;
-                } else {
-                    foreach (array_keys($this->pathMappings) as $pattern) {
-                        if (fnmatch($pattern, $relativePath)) {
-                            $matchesMapping = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            if (!$matchesMapping && !is_dir($fullPath)) {
-                continue;
-            }
-
-            if (is_dir($fullPath)) {
-                $this->detectChangedFiles($relativePath);
-            } else {
-                $currentHash = md5_file($fullPath);
-                if (!isset($this->previousFileHashes[$relativePath]) || $this->previousFileHashes[$relativePath] !== $currentHash) {
-                    $this->changedFiles[] = $relativePath;
-                }
-                $this->fileHashes[$relativePath] = $currentHash;
-            }
-        }
-    }
-    
-    private function detectDeletedFiles(): void
-    {
-        $deleted = array_diff(array_keys($this->previousFileHashes), array_keys($this->fileHashes));
-        $this->deletedFiles = $deleted;
     }
     
     private function connectFTPS(): void
@@ -211,7 +162,7 @@ class Client
                 echo "Failed to delete $remoteFile\n";
                 $errors[] = $file;
             }
-            unset($this->fileHashes[$file]);
+            $this->detector->removeFileHash($file);
         }
         return $errors;
     }
@@ -243,10 +194,7 @@ class Client
         ftp_cdup($this->conn);
     }
     
-    private function saveHashes(): void
-    {
-        file_put_contents($this->hashFile, json_encode($this->fileHashes, JSON_PRETTY_PRINT));
-    }
+
     
     private function disconnect(): void
     {
