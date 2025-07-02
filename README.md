@@ -64,10 +64,17 @@ This allows you to keep multiple configuration files for different environments 
 
 ## Usage
 
+
 Run deployment using:
 
 ```bash
 vendor/bin/deploy.php
+```
+
+To only generate or update the hash file (without uploading or deleting any files), use the `--only-hashes` option:
+
+```bash
+vendor/bin/deploy.php --only-hashes
 ```
 
 You can also specify a custom config file location with the `--config` argument:
@@ -75,6 +82,7 @@ You can also specify a custom config file location with the `--config` argument:
 ```bash
 vendor/bin/deploy.php --config=path/to/deploy-config.php
 ```
+
 
 To see available options, run:
 
@@ -105,6 +113,7 @@ Or, to deploy with a custom config file (e.g., for staging):
 composer deploy:staging
 ```
 
+
 ## Deployment Hashes File (`deploy-hashes.json`)
 
 FTPS Deploy keeps track of file changes using a JSON file (by default named `.deploy-hashes.json`) in your project directory. This file stores hashes of previously deployed files to determine which files have changed and need to be uploaded or deleted.
@@ -116,10 +125,20 @@ FTPS Deploy keeps track of file changes using a JSON file (by default named `.de
 'hash_file' => '/path/to/your-hashes.json',
 ```
 
+
 This is useful if you want to:
 - Store deployment state outside your project directory (e.g., in CI/CD pipelines like GitHub Actions)
 - Use different hash files for different environments
 - Avoid committing the hash file to version control
+
+## Options
+
+| Option           | Description                                                      |
+|------------------|------------------------------------------------------------------|
+| `init`           | Create a template deploy-config.php in the current directory.     |
+| `--config=PATH`  | Use a custom config file instead of ./deploy-config.php.          |
+| `--only-hashes`  | Only generate/update the hash file, do not upload or delete files.|
+| `--help`         | Show help message.                                               |
 
 If you change the location, make sure the path is writable by the deployment process.
 

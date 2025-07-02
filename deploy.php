@@ -24,10 +24,11 @@ function initializeConfig(string $targetDir): void
 
 function printHelp(): void
 {
-    echo "Usage: deploy.php [init|--help] [--config=path]\n";
+    echo "Usage: deploy.php [init|--help|--only-hashes] [--config=path]\n";
     echo "\nOptions:\n";
     echo "  init            Create a template deploy-config.php in the current directory.\n";
     echo "  --config=PATH   Use a custom config file instead of ./deploy-config.php.\n";
+    echo "  --only-hashes   Only generate/update the hash file, do not upload or delete files.\n";
     echo "  --help          Show this help message.\n";
     echo "\n";
 }
@@ -63,12 +64,14 @@ if (PHP_SAPI === 'cli') {
     }
 
     if (!file_exists($configFile)) {
-        die("Config file 'deploy-config.php' not found in {$workingDir}\n" .
+        die("Config file not found at: {$configFile}\n" .
             "Run with \"init\" to create a template configuration file.\n");
     }
     
+    echo "Using config file: {$configFile}\n";
     $config = require $configFile;
-    
+
+    $onlyHashes = in_array('--only-hashes', $argv, true);
     try {
         $client = new Client(
             host: $config['host'],
@@ -79,9 +82,8 @@ if (PHP_SAPI === 'cli') {
             pathMappings: $config['path_mappings'] ?? [],
             hashFile: $config['hash_file'] ?? '.deploy-hashes.json'
         );
-        
-        $client->deploy();
+        $client->deploy($onlyHashes);
     } catch (\Exception $e) {
-        die("Deployment error: " . $e->getMessage() . "\n");
+        die("Deployment error: " . $e->getMessage() . "\nConfig file: {$configFile}\n");
     }
 }
