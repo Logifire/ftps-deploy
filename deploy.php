@@ -1,20 +1,18 @@
 #!/usr/bin/env php
 <?php
 
-// composer-root-finder.php
-function findComposerRoot($start = __DIR__) {
-    $dir = $start;
-    while ($dir !== '/') {
-        if (file_exists($dir . '/composer.json')) {
-            return $dir;
-        }
-        $dir = dirname($dir);
-    }
-    return null;
-}
+// Find composer autoload
+$autoloadPaths = [
+    __DIR__ . '/../../autoload.php',
+    __DIR__ . '/vendor/autoload.php',
+];
 
-$rootDir = findComposerRoot();
-require $rootDir . '/vendor/autoload.php';
+foreach ($autoloadPaths as $path) {
+    if (file_exists($path)) {
+        $autoloader = require $path;
+        break;
+    }
+}
 
 use Deploy\Client;
 
