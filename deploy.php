@@ -95,6 +95,7 @@ if (PHP_SAPI === 'cli') {
         );
         $client->deploy($onlyHashes);
     } catch (\Exception $e) {
-        die("Deployment error: " . $e->getMessage() . "\nConfig file: {$configFile}\n");
+        echo "Deployment error: " . $e->getMessage() . "\nConfig file: {$configFile}\n";
+        exit(1);
     }
 }
