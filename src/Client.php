@@ -22,6 +22,9 @@ class Client
         private array $pathMappings = [],
         string $hashFile = '.deploy-hashes.json'
     ) {
+        if (empty($this->host)) {
+            throw new \InvalidArgumentException("FTPS host is not set in the config. Please specify a valid 'host' value.");
+        }
         $this->localBasePath = rtrim(getcwd(), '/');
         $this->remoteBasePath = '/';
         $this->detector = new ChangedFilesDetector(
@@ -110,7 +113,6 @@ class Client
     private function connectFTPS(): void
     {
         echo "Connecting to FTPS server...\n";
-        
         $this->conn = ftp_ssl_connect($this->host, $this->port, self::CONNECTION_TIMEOUT_SECONDS);
         if (!$this->conn) {
             throw new \Exception(sprintf(
